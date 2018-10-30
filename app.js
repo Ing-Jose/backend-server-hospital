@@ -9,6 +9,8 @@ var app = express();
 var appRoutes = require('./routes/app');
 var usarioRoutes = require('./routes/usuario');
 var loginRoutes = require('./routes/login');
+var hospitalRoutes = require('./routes/hospital');
+var medicoRoutes = require('./routes/medico');
 
 //Conexion a la DB
 mongoose.connection.openUri('mongodb://localhost:27017/hospitalDB', { useNewUrlParser: true },(err,res) => {
@@ -22,6 +24,8 @@ app.use(express.urlencoded({ extended: false }));
 
 //Rutas
 app.use('/usuario',usarioRoutes);
+app.use('/hospital',hospitalRoutes);
+app.use('/medico',medicoRoutes);
 app.use('/login',loginRoutes);
 app.use('/',appRoutes);
 
