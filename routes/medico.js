@@ -12,25 +12,43 @@ var Medico = require('../models/medico');
  *  Obtener todos los medicos
  * =====================================================*/
 app.get('/', (req, res,) => {
+    var desde = req.query.desde || 0;
+    desde = Number(desde);
     //usuando el modelo de usuario
     /** mostrando no todos los campos de medico */
-    Medico.find({}).exec(( err, medicos ) => {
-        // en caso que la consulta tenga algun error
-        if (err) { 
-            // con el return cuando se dispara la funcion hasta aca queda el procedimiento
-            return res.status(500).json({
-                ok: false,
-                mensaje: 'Error al cargar los medicos',
-                errors: err
+    Medico.find({})
+        .populate('usuario','nombre email') //para taar la informacion de la coleccion de medico pero solo el nombre y email
+        .populate('hospital','nombre')
+        .skip(desde) // desde donde comenzara inglremento de 5 en 5
+        .limit(5) //limitar cantidad a mostrar
+        .exec(( err, medicos ) => {
+            // en caso que la consulta tenga algun error
+            if (err) { 
+                // con el return cuando se dispara la funcion hasta aca queda el procedimiento
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error al cargar los medicos',
+                    errors: err
+                });
+            }
+            Medico.count({}, (err, conteo) => {
+                if (err) {
+                    //con el return cuando se dispara la funcion hasta aca queda el procedimiento
+                    return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error al contar usuario',
+                        errors: err
+                    });
+                }
+                //sino sucede ningun error
+                //arreglo de todos los usuarios
+                res.status(200).json({
+                    ok: true,
+                    total: conteo,
+                    medicos: medicos
+                });
             });
-        }
-        // sino sucede ningun error
-        // arreglo de todos los usuarios
-        res.status(200).json({
-            ok: true,
-            medicos: medicos 
         });
-    });
     
 });
 

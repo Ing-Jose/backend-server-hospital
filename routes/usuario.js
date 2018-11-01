@@ -18,25 +18,42 @@ var Usuario = require('../models/usuario');
  *  Obtener todos los usuarios
  * =====================================================*/
 app.get('/', (req, res,) => {
+    var desde = req.query.desde || 0;
+    desde=Number(desde);
     //usuando el modelo de usuario
-    /** mostrando no todos los campos de */
-    Usuario.find({},'nombre email img rol').exec(( err, usuarios ) => {
-        //en caso que la consulta tenga algun error
-        if (err) { 
-            //con el return cuando se dispara la funcion hasta aca queda el procedimiento
-            return res.status(500).json({
-                ok: false,
-                mensaje: 'Error cargando usuario',
-                errors: err
+    /** mostrando no todos los campos de usuario*/
+    Usuario.find({},'nombre email img rol')
+        .skip(desde) // desde donde comenzara inglremento de 5 en 5
+        .limit(5) //limitar cantidad a mostrar
+        .exec(( err, usuarios ) => {
+            //en caso que la consulta tenga algun error
+            if (err) { 
+                //con el return cuando se dispara la funcion hasta aca queda el procedimiento
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error cargando usuario',
+                    errors: err
+                });
+            }
+            Usuario.count({},(err,conteo) => {
+                if (err) {
+                    //con el return cuando se dispara la funcion hasta aca queda el procedimiento
+                    return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error al contar usuario',
+                        errors: err
+                    });
+                }
+                //sino sucede ningun error
+                //arreglo de todos los usuarios
+                res.status(200).json({
+                    ok: true,
+                    total: conteo,
+                    usuarios: usuarios
+                });
             });
-        }
-        //sino sucede ningun error
-        //arreglo de todos los usuarios
-        res.status(200).json({
-            ok: true,
-            usuarios: usuarios 
+            
         });
-    });
     
 });
 
@@ -128,7 +145,7 @@ app.post('/',mdAutenticacion.verificaToken,( req, res ) => {
         res.status(201).json({
             ok: true,
             usuario: usuarioGuardado,
-            usuarioToken: req.usuario
+            // usuarioToken: req.usuario
         });
     });
     
